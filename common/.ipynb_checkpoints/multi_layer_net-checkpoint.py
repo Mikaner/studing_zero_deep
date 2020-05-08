@@ -5,7 +5,20 @@ from collections import OrderedDict
 from common.layers import *
 from common.gradient import numerical_gradient
 
-class MultiLayerNer:
+class MultiLayerNet:
+    """全結合による多層NN
+    
+    Parameters
+    ----------
+    input_size
+    hidden_size_list
+    output_size
+    activation : 活性化関数の種類 'relu' or 'sigmoid'
+    weight_init_std : 重みの標準偏差を指定
+        'relu' or 'he' -> 「Heの初期値」
+        'sigmoid' or 'xavier' -> 「Xavierの初期値」
+    weight_decay_lambda : Weight Decay (L2ノルム)の強さ
+    """
     
     def __init__(self, input_size, hidden_size_list, output_size,
                  activation='relu', weight_init_std='relu', weight_decay_lambda=0):
@@ -18,7 +31,7 @@ class MultiLayerNer:
         
         self.__init_weight(weight_init_std)
         activation_layer = {'sigmoid': Sigmoid, 'relu': Relu}
-        self.layers = OrderdDict()
+        self.layers = OrderedDict()
         for idx in range(1, self.hidden_layer_num+1):
             self.layers['Affine' + str(idx)] = Affine(self.params['W' + str(idx)],
                                                       self.params['b' + str(idx)])
@@ -45,7 +58,7 @@ class MultiLayerNer:
             self.params['b' + str(idx)] = np.zeros(all_size_list[idx])
             
             
-    def predixt(self, x):
+    def predict(self, x):
         for layer in self.layers.values():
             x = layer.forward(x)
             
@@ -68,11 +81,12 @@ class MultiLayerNer:
         y = np.argmax(y, axis=1)
         if t.ndim != 1 : t = np.argmax(t, axis=1)
             
-            accuracy = np.sum(y == t) / float(x.shape[0])
-            return accuracy
+        accuracy = np.sum(y == t) / float(x.shape[0])
+        return accuracy
         
         
     def numerical_gradient(self, x, t):
+        pass
         
         
     def gradient(self, x, t):
@@ -82,7 +96,7 @@ class MultiLayerNer:
         dout = 1
         dout = self.last_layer.backward(dout)
         
-        layers = list(self.layers.value())
+        layers = list(self.layers.values())
         layers.reverse()
         
         for layer in layers:
